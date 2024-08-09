@@ -278,18 +278,26 @@ class BIDV:
 
         return history_records
     def createTaskCaptcha(self, base64_img):
+        url_1 = 'https://captcha.pay2world.vip//bidvBIZ'
+        url_2 = 'https://captcha1.pay2world.vip//bidvBIZ'
+        url_3 = 'https://captcha2.pay2world.vip//bidvBIZ'
+        
         payload = json.dumps({
         "image_base64": base64_img
         })
         headers = {
         'Content-Type': 'application/json'
         }
-
-        response = requests.request("POST", self.url['solve_captcha'], headers=headers, data=payload)
-        try:
-            return response.json()
-        except:
-            return response.text
+        
+        for _url in [url_1, url_2, url_3]:
+            try:
+                response = requests.request("POST", _url, headers=headers, data=payload, timeout=10)
+                if response.status_code in [404, 502]:
+                    continue
+                return json.loads(response.text)
+            except:
+                continue
+        return {}
     def solveCaptcha(self):
         url = self.url['getCaptcha']
         response = self.session.post(url)
@@ -298,9 +306,9 @@ class BIDV:
         # captchaText = self.checkProgressCaptcha(json.loads(task)['taskId'])
         if 'prediction' in result and result['prediction']:
             captcha_value = result['prediction']
-            return {"status": True, "captcha": captcha_value}
+            return {"status": True, "key": self.guid, "captcha": captcha_value}
         else:
-            return {"status": False, "msg": "Error getTaskResult"}
+            return {"status": False, "msg": "Error solve captcha", "data": result}
     def process_redirect(self,response):
         
         pattern = r'dse_sessionId=(.*?)&dse_applicationId=(.*?)&dse_pageId=(.*?)&dse_operationName=(.*?)&dse_errorPage=(.*?)&dse_processorState=(.*?)&dse_nextEventName=(.*?)\';'
