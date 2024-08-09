@@ -306,7 +306,7 @@ class BIDV:
         # captchaText = self.checkProgressCaptcha(json.loads(task)['taskId'])
         if 'prediction' in result and result['prediction']:
             captcha_value = result['prediction']
-            return {"status": True, "key": self.guid, "captcha": captcha_value}
+            return {"status": True, "captcha": captcha_value}
         else:
             return {"status": False, "msg": "Error solve captcha", "data": result}
     def process_redirect(self,response):
